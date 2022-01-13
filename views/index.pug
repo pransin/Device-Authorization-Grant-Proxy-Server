@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}!
+
+  form(action='/' method='post') 
+    p Enter the code shown on your TV screen:
+    input(type='text' name='code' placeholder="Enter Code")
+    input(type='submit' value='Next')
+
+  if errors
+    ul
+      for error in errors
+        li= error.msg || 'Invalid Code'
+  //- a(href='/')
+  //- a(href='/auth/google') #{'Login with Google'}
+
+

@@ -1,0 +1,5 @@
+.env
+test.js
+config.js
+node_modules
+sessions
