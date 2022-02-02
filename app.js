@@ -122,7 +122,7 @@ app.get(
       'userCode': userCode,
       'verification_uri': process.env.BASE_URL + '/device',
       'expires_in': 300,
-      'interval': Math.round(60 / process.env.LIMIT_REQUESTS_PER_MINUTE)  //TODO: NOT_SET
+      'interval': Math.round(60 / process.env.LIMIT_REQUESTS_PER_MINUTE)
     };
     res.send(data);
   }
@@ -134,7 +134,7 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
   if (!state || !req.query.code)
     res.send('Invalid Request. Try Again');
   else {
-    // POST request to get access_token and refresh_token
+    // Exchange authorization code to get access_token and refresh_token
     const params = new URLSearchParams({
       'grant_type': 'authorization_code',
       'code': req.query.code,
@@ -142,7 +142,7 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
       'client_id': config.oAuthClientID,
       'client_secret': config.oAuthclientSecret
     });
-    const response = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', body: params });
+    const response = await fetch(config.tokenEndpoint, { method: 'POST', body: params });
     const data = await response.json();
     // console.log(response);
     // Kill request in case of failure
@@ -185,9 +185,9 @@ app.post('/token', tokenRequestLimiter, (req, res) => {
     else {
       const data = codeCache.get(req.body.deviceCode);
       if (!data)
-        res.send('invalid_grant');
+        res.statusCode(400).send('invalid_grant');
       else if (data.status === 'pending')
-        res.send('authorization_pending')
+        res.statusCode(202).send('authorization_pending')
       else {
         // Authorization Complete, Stash the entry for deviceCode
         codeCache.del(req.body.deviceCode);
@@ -195,7 +195,29 @@ app.post('/token', tokenRequestLimiter, (req, res) => {
       }
     }
 });
-
+// Route for refreshing access_token
+app.post('/refresh', async (req, res) => {
+  if (req.body.grant_type !== 'refresh_token')
+    res.send('invalid_grant')
+  else if (!req.body.refresh_token)
+    res.send('invalid_request')
+  else {
+    const params = new URLSearchParams({
+      'grant_type': 'refresh_token',
+      'refresh_token': req.body.refresh_token,
+      'client_id': config.oAuthClientID,
+      'client_secret': config.oAuthclientSecret
+    });
+    const response = await fetch(config.tokenEndpoint, { method: 'POST', body: params });
+    if (!response.ok)
+      res.send('Failure')
+    else {
+      const data = await response.json();
+      data.expires_in = Math.round(0.999 * data.expires_in)
+      res.send(data)
+    }
+  }
+})
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
