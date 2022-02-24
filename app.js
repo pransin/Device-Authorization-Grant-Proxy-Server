@@ -163,7 +163,7 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
       }, 120)
       codeCache.del(state.userCode);
       // console.log(codeCache.get(cache.deviceCode));
-      res.send('You have been logged in');
+      res.send('Authentication Successful. You will be logged in automatically in KODI');
     }
   }
 });
@@ -178,16 +178,18 @@ const tokenRequestLimiter = rateLimit({
 });
 app.post('/token', tokenRequestLimiter, (req, res) => {
   if (!req.body.deviceCode || !req.body.grant_type)
-    res.send("invalid_request");
+    res.status(400).send("invalid_request");
   else
     if (req.body.grant_type !== 'urn:ietf:params:oauth:grant-type:device_code')
-      res.send('Only urn:ietf:params:oauth:grant-type:device_code is supported');
+      res.status(400).send('Only urn:ietf:params:oauth:grant-type:device_code is supported');
     else {
       const data = codeCache.get(req.body.deviceCode);
+      // console.log(data)
       if (!data)
-        res.statusCode(400).send('invalid_grant');
-      else if (data.status === 'pending')
-        res.statusCode(202).send('authorization_pending')
+        res.status(400).send('invalid_grant');
+      else if (data.status === 'pending') {
+        res.status(202).send('authorization_pending')
+      }
       else {
         // Authorization Complete, Stash the entry for deviceCode
         codeCache.del(req.body.deviceCode);
@@ -210,7 +212,7 @@ app.post('/refresh', async (req, res) => {
     });
     const response = await fetch(config.tokenEndpoint, { method: 'POST', body: params });
     if (!response.ok)
-      res.send('Failure')
+      res.status(response.status).send('Failure')
     else {
       const data = await response.json();
       data.expires_in = Math.round(0.999 * data.expires_in)
@@ -228,6 +230,8 @@ app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
+  if (req.app.get('env') === 'development' && err.status !== 404)
+    console.log(err);
 
   // render the error page
   res.status(err.status || 500);
