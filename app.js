@@ -3,10 +3,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const session = require('express-session');
 const NodeCache = require("node-cache");
-const sessionFileStore = require('session-file-store');
-
 // Create a new config file for sensitive data, if one does not exist
 const config = require('./config.js');
 const crypto = require('crypto');
@@ -16,30 +13,13 @@ const fetch = require('node-fetch');
 const rateLimit = require('express-rate-limit')
 
 require('dotenv').config();
-// var indexRouter = require('./routes/index');
-// var usersRouter = require('./routes/users');
+
 
 var app = express();
-const fileStore = sessionFileStore(session);
 const codeCache = new NodeCache();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-
-// // Set up OAuth 2.0 authentication through the passport.js brary.           
-// const passport = require('passport');
-// const auth = require('./auth');
-// auth(passport);
-
-// Set up a session middleware to handle user sessions.
-// NOTE: A secret is used to sign the cookie. This is just used for this sample
-// app and should be changed.
-const sessionMiddleware = session({
-  resave: true,
-  saveUninitialized: true,
-  store: new fileStore({}),
-  secret: 'no secret for now',
-});
 
 // Set up different logger later if required
 app.use(logger('dev'));
@@ -47,13 +27,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Enable user session handling.
-app.use(sessionMiddleware);
-
-// Set up passport and session handling.
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 // Welcome Page. 
 app.get('/', (req, res) => {
@@ -144,7 +117,6 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
     });
     const response = await fetch(config.tokenEndpoint, { method: 'POST', body: params });
     const data = await response.json();
-    // console.log(response);
     // Kill request in case of failure
     if (!response.ok || !data.access_token) {
       res.send("Failure");
@@ -239,46 +211,3 @@ app.use(function (err, req, res, next) {
 });
 
 module.exports = app;
-
-// app.get('/auth/google', passport.authenticate('google', {
-//   scope: config.scopes,
-//   failureFlash: true,  // Display errors to the user.
-//   session: true,
-// }));
-
-// Callback receiver for the OAuth process after log in.
-// app.get(
-//   '/auth/google/callback',
-//   passport.authenticate(
-//     'google', { failureRedirect: '/', failureFlash: true, session: true }),
-//   (req, res) => {
-//     // User has logged in.
-//     console.log('User has logged in.');
-//     res.redirect('/');
-//   });
-
-// Middleware that adds the user of this session as a local variable,
-// so it can be displayed on all pages when logged in.
-// app.use((req, res, next) => {
-//   res.locals.name = '-';
-//   if ( req.user && req.user.profile && req.user.profile.name) {
-//     res.locals.name =
-//         req.user.profile.name.givenName || req.user.profile.displayName;
-//   }
-
-//   res.locals.avatarUrl = '';
-//   if (req.user && req.user.profile && req.user.profile.photos) {
-//     res.locals.avatarUrl = req.user.profile.photos[0].value;
-//   }
-//   next();
-// });
-
-// app.get(
-//   '/logout',
-//   (res, req) => {
-//     req.logout();
-//     res.redirect('/');
-// });
-
-// app.use('/', indexRouter);
-// app.use('/users', usersRouter);

@@ -10,7 +10,7 @@ exports.sha256 = (buffer) => {
 }
 
 exports.generateRandomString = (length = 6) => {
-  return Math.random().toString(36).substring(2, length + 2);;
+  return Math.random().toString(36).substring(2, length + 2).toUpperCase();
 }
 
 exports.build_auth_url = (baseURL, params) => {
