@@ -66,7 +66,7 @@ app.post('/', [
         codeCache.set(state, { userCode }, 300);
         const query = {
           'response_type': 'code',
-          'client_id': config.oAuthClientID,
+          'client_id': process.env.OAUTH_CLIENT_ID,
           'redirect_uri': process.env.BASE_URL + config.oAuthCallbackUrl,
           'scope': config.scopes.join(' '),
           'prompt': 'consent',
@@ -113,8 +113,8 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
       'grant_type': 'authorization_code',
       'code': req.query.code,
       'redirect_uri': process.env.BASE_URL + config.oAuthCallbackUrl,
-      'client_id': config.oAuthClientID,
-      'client_secret': config.oAuthclientSecret
+      'client_id': process.env.OAUTH_CLIENT_ID,
+      'client_secret': process.env.OAUTH_CLIENT_SECRET
     });
     const response = await fetch(config.tokenEndpoint, { method: 'POST', body: params });
     const data = await response.json();
@@ -179,8 +179,8 @@ app.post('/refresh', async (req, res) => {
     const params = new URLSearchParams({
       'grant_type': 'refresh_token',
       'refresh_token': req.body.refresh_token,
-      'client_id': config.oAuthClientID,
-      'client_secret': config.oAuthclientSecret
+      'client_id': process.env.OAUTH_CLIENT_ID,
+      'client_secret': process.env.OAUTH_CLIENT_SECRET
     });
     const response = await fetch(config.tokenEndpoint, { method: 'POST', body: params });
     if (!response.ok)
