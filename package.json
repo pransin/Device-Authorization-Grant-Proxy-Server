@@ -2,6 +2,7 @@
   "name": "photos-backend",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "start": "node ./bin/www",
     "devstart": "nodemon ./bin/www --ignore sessions",
@@ -23,5 +24,8 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.9"
+  },
+  "engines": {
+    "node": "14.17.0"
   }
 }

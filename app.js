@@ -69,6 +69,7 @@ app.post('/', [
           'client_id': config.oAuthClientID,
           'redirect_uri': process.env.BASE_URL + config.oAuthCallbackUrl,
           'scope': config.scopes.join(' '),
+          'prompt': 'consent',
           'access_type': 'offline',
           'state': state
         }
@@ -122,7 +123,6 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
       res.send("Failure");
       codeCache.del(state.userCode);
       codeCache.del(state.deviceCode);
-      // throw new Error(response);
     }
     else {
       // Request successful. Store tokens in cache for client to fetch later.
