@@ -199,8 +199,8 @@ app.get('/privacypolicy', (req, res) => {
 })
 
 // Google search console verification
-app.get('/googlec89f48a7a11d4868', (req, res) => {
-  res.sendFile('views/googlec89f48a7a11d4868.html', { root: __dirname})
+app.get('/googlec89f48a7a11d4868.html', (req, res) => {
+  res.sendFile('views/googlec89f48a7a11d4868.html', { root: __dirname })
 })
 
 // catch 404 and forward to error handler
