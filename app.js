@@ -197,11 +197,16 @@ app.post('/refresh', async (req, res) => {
 app.get('/privacypolicy', (req, res) => {
   res.render('privacy', { title: 'Privacy Policy' });
 })
+
+// Google search console verification
+app.get('/googlec89f48a7a11d4868', (req, res) => {
+  res.sendFile('views/googlec89f48a7a11d4868.html', { root: __dirname})
+})
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
-
 // error handler
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
