@@ -192,6 +192,11 @@ app.post('/refresh', async (req, res) => {
     }
   }
 })
+
+// Privacy Policy
+app.get('/privacypolicy', (req, res) => {
+  res.render('privacy', { title: 'Privacy Policy' });
+})
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

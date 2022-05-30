@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  h1= title
+  ul
+    li The add-on stores your account name, account id, and the access data in your Kodi device only. This is used to display your account as an option menu in Kodi and to access your photos library.
+    li The add-on access your files information only from your Kodi device directly to the cloud drive provider.
+    li The add-on uses your files information for the purpose of displaying it in Kodi so you can play your video or view your pictures.
+    li The access token is removed immediately after it has been fetched by your kodi client.
+    li Each scope requested by the add-on has an specific use and need:
+    table(style='width:100%' border='1')
+      tr
+        th Scope
+        th Purpose
+      tr
+        td openid & email
+        td Used to fetch user identification information such as email which is shown in the first page of addon.
+      tr
+        td https://www.googleapis.com/auth/photoslibrary.readonly
+        td Used to access your photos and videos from photos library
+
+
+
+
