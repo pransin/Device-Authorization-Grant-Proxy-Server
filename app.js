@@ -37,9 +37,9 @@ app.get('/', (req, res) => {
 app.post('/', [
   body('code')
     .isLength(6)
-    .withMessage('Code contains 6-digits')
+    .withMessage('Code contains 6-digits.')
     .isAlphanumeric()
-    .withMessage('Code contains only alphanumeric characters').escape()
+    .withMessage('Code contains only alphanumeric characters.').escape()
 ],
   (req, res) => {
     const errors = validationResult(req);
