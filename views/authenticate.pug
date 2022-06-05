@@ -7,7 +7,7 @@ block content
     h1= title
     p After you enter the code shown on KODI client, you will be directed to the Google Sign-in Page. 
 
-    form(action='/' method='post') 
+    form(action='/authenticate' method='post') 
       input.input-code(name="code" placeholder="Enter code...")
       .v-spacer
       div
@@ -15,8 +15,10 @@ block content
 
     if errors
       br
-      for error in errors
-        text.error=error.msg || 'Invalid Code'
+      ul
+        for error in errors
+          li
+            text.error=error.msg || 'Invalid Code'
       br
     br
  

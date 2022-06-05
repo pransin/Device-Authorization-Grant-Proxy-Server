@@ -39,7 +39,7 @@ app.get('/authenticate', (req, res) => {
 });
 
 // User Code verification
-app.post('/', [
+app.post('/authenticate', [
   body('code')
     .isLength(6)
     .withMessage('Code contains 6-digits.')
@@ -49,7 +49,7 @@ app.post('/', [
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.render('index', {
+      res.render('authenticate', {
         title: 'Google Photos for Kodi',
         errors: errors.array(),
         data: req.body,
@@ -59,7 +59,7 @@ app.post('/', [
       const userCode = req.body.code;
       const cache = codeCache.get(userCode);
       if (cache == undefined) {
-        res.render('index', {
+        res.render('authenticate', {
           title: 'Google Photos for Kodi',
           errors: ["Invalid Code"],
           data: req.body
