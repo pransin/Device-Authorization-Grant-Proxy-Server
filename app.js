@@ -33,6 +33,11 @@ app.get('/', (req, res) => {
   res.render('index', { title: 'Google Photos for Kodi' });
 });
 
+// authenticate/Login Page
+app.get('/authenticate', (req, res) => {
+  res.render('authenticate', { title: 'Google Photos for Kodi' });
+});
+
 // User Code verification
 app.post('/', [
   body('code')
@@ -119,6 +124,7 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
     const response = await fetch(config.tokenEndpoint, { method: 'POST', body: params });
     const data = await response.json();
     // Kill request in case of failure
+    // TODO: Change send to render
     if (!response.ok || !data.access_token) {
       res.send("Failure");
       codeCache.del(state.userCode);
@@ -134,7 +140,7 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
         'expires_in': Math.round(0.99 * data.expires_in)
       }, 120)
       codeCache.del(state.userCode);
-      // console.log(codeCache.get(cache.deviceCode));
+          // TODO: Change send to render
       res.send('Authentication Successful. You will be logged in automatically in KODI');
     }
   }
