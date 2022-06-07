@@ -30,12 +30,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Welcome Page. 
 app.get('/', (req, res) => {
-  res.render('index', { title: 'Google Photos for Kodi' });
+  res.render('index', { title: 'GPhotos for Kodi' });
 });
 
 // authenticate/Login Page
 app.get('/authenticate', (req, res) => {
-  res.render('authenticate', { title: 'Google Photos for Kodi' });
+  res.render('authenticate', { title: 'GPhotos for Kodi' });
 });
 
 // User Code verification
@@ -50,7 +50,7 @@ app.post('/authenticate', [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.render('authenticate', {
-        title: 'Google Photos for Kodi',
+        title: 'GPhotos for Kodi',
         errors: errors.array(),
         data: req.body,
       })
@@ -60,7 +60,7 @@ app.post('/authenticate', [
       const cache = codeCache.get(userCode);
       if (cache == undefined) {
         res.render('authenticate', {
-          title: 'Google Photos for Kodi',
+          title: 'GPhotos for Kodi',
           errors: ["Invalid Code"],
           data: req.body
         });
