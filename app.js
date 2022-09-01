@@ -35,16 +35,15 @@ app.get('/', (req, res) => {
 
 // authenticate/Login Page
 app.get('/authenticate', (req, res) => {
-  res.render('authenticate', { title: 'GPhotos for Kodi' });
+  res.render('authenticate', { title: 'GPhotos for Kodi', code: req.query.code });
 });
 
 // User Code verification
 app.post('/authenticate', [
   body('code')
-    .isLength(6)
-    .withMessage('Code contains 6-digits.')
+    .isLength(8)
     .isAlphanumeric()
-    .withMessage('Code contains only alphanumeric characters.').escape()
+    .withMessage('Invalid Code').escape()
 ],
   (req, res) => {
     const errors = validationResult(req);
@@ -91,7 +90,7 @@ app.get(
     const cache = {
       'deviceCode': deviceCode,
     };
-    const userCode = helpers.generateRandomString(6);
+    const userCode = helpers.generateRandomString(8);
     codeCache.set(userCode, cache, 300);
 
     // Placeholder entry for deviceCode. Really required?
@@ -140,7 +139,7 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
         'expires_in': Math.round(0.99 * data.expires_in)
       }, 120)
       codeCache.del(state.userCode);
-          // TODO: Change send to render
+      // TODO: Change send to render
       res.send('Authentication Successful. You will be logged in automatically in KODI');
     }
   }
