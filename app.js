@@ -70,7 +70,7 @@ app.post('/authenticate', [
         codeCache.set(state, { userCode }, 300);
         const query = {
           'response_type': 'code',
-          'client_id': process.env.OAUTH_CLIENT_ID,
+          'client_id': cache.clientId || process.env.OAUTH_CLIENT_ID,
           'redirect_uri': process.env.BASE_URL + config.oAuthCallbackUrl,
           'scope': config.scopes.join(' '),
           'prompt': 'consent',
@@ -83,28 +83,35 @@ app.post('/authenticate', [
     }
   });
 
-// Client GETS to this route to fetch a user code along with certain other parameters
-app.get(
-  '/device/code', (req, res) => {
-    const deviceCode = helpers.base64Encode(crypto.randomBytes(32));
-    const cache = {
-      'deviceCode': deviceCode,
-    };
-    const userCode = helpers.generateRandomString(8);
-    codeCache.set(userCode, cache, 300);
+const generateCode = (req, res) => {
+  const deviceCode = helpers.base64Encode(crypto.randomBytes(32));
+  const cache = {
+    'deviceCode': deviceCode,
+  };
 
-    // Placeholder entry for deviceCode. Really required?
-    codeCache.set(deviceCode, { 'status': 'pending' }, 300);
-    const data = {
-      'deviceCode': deviceCode,
-      'userCode': userCode,
-      'verification_uri': process.env.BASE_URL + '/device',
-      'expires_in': 300,
-      'interval': Math.round(60 / process.env.LIMIT_REQUESTS_PER_MINUTE)
-    };
-    res.send(data);
+  console.log(req.method)
+  if (req.method === 'POST') {
+    cache["clientId"] = req.body.clientId;
+    cache["clientSecret"] = req.body.clientSecret;
   }
-)
+
+  const userCode = helpers.generateRandomString(8);
+  codeCache.set(userCode, cache, 300);
+
+  // Placeholder entry for deviceCode. Really required?
+  codeCache.set(deviceCode, { 'status': 'pending' }, 300);
+  const data = {
+    'deviceCode': deviceCode,
+    'userCode': userCode,
+    'verification_uri': process.env.BASE_URL + '/device',
+    'expires_in': 300,
+    'interval': Math.round(60 / process.env.LIMIT_REQUESTS_PER_MINUTE)
+  };
+  res.send(data);
+}
+// Client GETS to this route to fetch a user code along with certain other parameters
+app.get('/device/code', generateCode)
+app.post('/device/code', generateCode)
 
 // Redirect after authentication
 app.get(config.oAuthCallbackUrl, async (req, res) => {
@@ -113,12 +120,13 @@ app.get(config.oAuthCallbackUrl, async (req, res) => {
     res.send('Invalid Request. Try Again');
   else {
     // Exchange authorization code to get access_token and refresh_token
+    creds = codeCache.get(state.userCode);
     const params = new URLSearchParams({
       'grant_type': 'authorization_code',
       'code': req.query.code,
       'redirect_uri': process.env.BASE_URL + config.oAuthCallbackUrl,
-      'client_id': process.env.OAUTH_CLIENT_ID,
-      'client_secret': process.env.OAUTH_CLIENT_SECRET
+      'client_id': creds.clientId || process.env.OAUTH_CLIENT_ID,
+      'client_secret': creds.clientSecret || process.env.OAUTH_CLIENT_SECRET
     });
     const response = await fetch(config.tokenEndpoint, { method: 'POST', body: params });
     const data = await response.json();
@@ -184,8 +192,8 @@ app.post('/refresh', async (req, res) => {
     const params = new URLSearchParams({
       'grant_type': 'refresh_token',
       'refresh_token': req.body.refresh_token,
-      'client_id': process.env.OAUTH_CLIENT_ID,
-      'client_secret': process.env.OAUTH_CLIENT_SECRET
+      'client_id': req.body.clientId || process.env.OAUTH_CLIENT_ID,
+      'client_secret': req.body.clientSecret || process.env.OAUTH_CLIENT_SECRET
     });
     const response = await fetch(config.tokenEndpoint, { method: 'POST', body: params });
     if (!response.ok)
