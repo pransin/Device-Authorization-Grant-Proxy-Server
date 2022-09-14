@@ -206,6 +206,10 @@ app.post('/refresh', async (req, res) => {
   }
 })
 
+app.get('/credentialsguide', (req, res) => {
+  res.render('credentials', { title: 'How to create OAuth credentials?' });
+})
+
 // Privacy Policy
 app.get('/privacypolicy', (req, res) => {
   res.render('privacy', { title: 'Privacy Policy' });
